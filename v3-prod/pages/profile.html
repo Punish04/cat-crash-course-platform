@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — CAT CrashCourse 2026</title>
+  <meta name="description" content="Manage your CAT CrashCourse student profile and account settings." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://careerchoice360.in/pages/profile.html" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --blue-900:#0f2356;--blue-700:#1e4d9b;--blue-600:#2563eb;
+      --blue-500:#3b82f6;--blue-400:#60a5fa;--blue-100:#dbeafe;--blue-50:#eff6ff;
+      --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;
+      --gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-500:#64748b;
+      --gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+      --green-50:#f0fdf4;--green-600:#16a34a;
+      --sidebar-w:252px;
+      --font-display:'Sora',sans-serif;--font-body:'Inter',sans-serif;
+      --radius-md:12px;--radius-lg:18px;--radius-xl:28px;
+      --shadow-card:0 2px 16px rgba(15,35,86,.07);
+      --shadow-hover:0 6px 28px rgba(15,35,86,.12);
+      --t:0.2s cubic-bezier(.4,0,.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--gray-50);color:var(--gray-900);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.2}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+
+    /* ── APP LAYOUT ── */
+    .app{display:flex;min-height:100vh}
+
+    /* ── SIDEBAR ── */
+    .sidebar{width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--gray-100);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;transition:transform var(--t)}
+    .sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:12px}
+    .logo-mark{background:var(--blue-600);color:#fff;font-family:var(--font-display);font-weight:800;font-size:.78rem;padding:6px 9px;border-radius:9px}
+    .logo-title{font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--gray-900);display:block;line-height:1.1}
+    .logo-sub{font-size:.66rem;color:var(--gray-400);display:block}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+    .nav-section-label{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:14px 10px 6px}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;font-size:.875rem;font-weight:500;color:var(--gray-600);transition:var(--t)}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:var(--blue-50);color:var(--blue-700);font-weight:600}
+    .nav-icon{width:18px;height:18px;flex-shrink:0;color:var(--gray-400)}
+    .nav-item.active .nav-icon{color:var(--blue-600)}
+    .sidebar-footer{padding:14px 16px;border-top:1px solid var(--gray-100)}
+    .sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:var(--t)}
+    .sidebar-user:hover{background:var(--gray-50)}
+    .user-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--blue-100),#bfdbfe);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:.82rem;color:var(--blue-700);flex-shrink:0}
+    .user-name{font-size:.83rem;font-weight:600;color:var(--gray-800)}
+    .user-role{font-size:.72rem;color:var(--gray-400)}
+    .logout-icon{margin-left:auto;color:var(--gray-300);transition:var(--t)}
+    .sidebar-user:hover .logout-icon{color:#ef4444}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(15,35,86,.4);backdrop-filter:blur(4px);z-index:49}
+    .sidebar-overlay.open{display:block}
+
+    /* ── MAIN ── */
+    .main-area{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .dash-header{background:var(--white);border-bottom:1px solid var(--gray-100);padding:0 28px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:40}
+    .header-menu-btn{display:none;padding:6px;border-radius:8px;color:var(--gray-600);transition:var(--t)}
+    .header-menu-btn:hover{background:var(--gray-100)}
+    .header-title{font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--gray-900)}
+    .dash-content{padding:28px;max-width:900px}
+
+    /* ── PROFILE HERO ── */
+    .profile-hero{background:linear-gradient(135deg,var(--blue-700),var(--blue-900));border-radius:var(--radius-xl);padding:36px;display:flex;align-items:center;gap:28px;margin-bottom:28px;position:relative;overflow:hidden}
+    .profile-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%)}
+    .profile-big-avatar{width:80px;height:80px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1.8rem;color:#fff;border:3px solid rgba(255,255,255,.25);flex-shrink:0}
+    .profile-hero-info h2{font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:4px}
+    .profile-hero-info p{font-size:.88rem;color:rgba(255,255,255,.65)}
+    .profile-hero-badge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-size:.75rem;font-weight:600;padding:5px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.2)}
+    .profile-hero-badge-dot{width:7px;height:7px;border-radius:50%;background:#4ade80}
+
+    /* ── GRID ── */
+    .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+
+    /* ── CARDS ── */
+    .profile-card{background:var(--white);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-card);border:1px solid var(--gray-100)}
+    .profile-card-title{font-size:.88rem;font-weight:700;color:var(--gray-900);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+    .profile-card-title svg{width:16px;height:16px;color:var(--blue-500)}
+
+    /* Form fields */
+    .form-field{margin-bottom:16px}
+    .form-field:last-child{margin-bottom:0}
+    .form-field label{display:block;font-size:.78rem;font-weight:600;color:var(--gray-600);margin-bottom:5px}
+    .form-field input{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:.88rem;font-family:var(--font-body);color:var(--gray-900);outline:none;transition:var(--t);background:var(--white)}
+    .form-field input:focus{border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+    .form-field input[readonly]{background:var(--gray-50);color:var(--gray-500);cursor:default}
+    .form-field input[readonly]:focus{border-color:var(--gray-200);box-shadow:none}
+
+    .save-btn{display:flex;align-items:center;gap:7px;padding:10px 20px;background:var(--blue-600);color:#fff;border-radius:var(--radius-md);font-size:.88rem;font-weight:600;transition:var(--t);box-shadow:0 3px 12px rgba(37,99,235,.2);margin-top:18px;border:none;cursor:pointer}
+    .save-btn:hover{background:var(--blue-700);transform:translateY(-1px)}
+    .save-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* Course status */
+    .status-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .status-row:last-child{border-bottom:none;padding-bottom:0}
+    .status-label{font-size:.83rem;color:var(--gray-600);font-weight:500}
+    .status-value{font-size:.83rem;font-weight:700;color:var(--gray-900)}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:99px}
+    .badge-active{background:var(--green-50);color:var(--green-600);border:1px solid #d1fae5}
+    .badge-pending{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+
+    /* Progress bars */
+    .progress-row{margin-bottom:14px}
+    .progress-row:last-child{margin-bottom:0}
+    .progress-top{display:flex;justify-content:space-between;margin-bottom:6px}
+    .progress-subject{font-size:.83rem;font-weight:600;color:var(--gray-800)}
+    .progress-pct{font-size:.78rem;font-weight:700;color:var(--blue-600)}
+    .progress-bar{height:7px;background:var(--gray-100);border-radius:99px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:99px;transition:width .6s ease}
+
+    /* Activity feed */
+    .activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .activity-item:last-child{border-bottom:none;padding-bottom:0}
+    .activity-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-400);margin-top:5px;flex-shrink:0}
+    .activity-text{font-size:.84rem;color:var(--gray-700);line-height:1.5}
+    .activity-time{font-size:.73rem;color:var(--gray-400);margin-top:2px}
+
+    /* Password change */
+    .change-pw-toggle{font-size:.83rem;font-weight:600;color:var(--blue-600);cursor:pointer;display:flex;align-items:center;gap:5px;margin-top:4px;transition:var(--t)}
+    .change-pw-toggle:hover{color:var(--blue-800)}
+    .pw-section{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-100)}
+    .pw-section.open{display:block}
+
+    /* Danger zone */
+    .danger-card{background:var(--white);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-card);border:1px solid #fee2e2}
+    .danger-title{font-size:.88rem;font-weight:700;color:#dc2626;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+    .danger-desc{font-size:.83rem;color:var(--gray-500);margin-bottom:16px;line-height:1.55}
+    .danger-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#fef2f2;color:#dc2626;border:1.5px solid #fee2e2;border-radius:var(--radius-md);font-size:.85rem;font-weight:600;transition:var(--t);cursor:pointer}
+    .danger-btn:hover{background:#fee2e2}
+
+    /* Toast */
+    .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-md);background:#fff;box-shadow:var(--shadow-hover);border-left:4px solid var(--blue-600);font-size:.85rem;font-weight:500;min-width:240px;animation:toastIn .3s ease}
+    .toast.success{border-color:#16a34a}
+    .toast.error{border-color:#ef4444}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .main-area{margin-left:0}
+      .header-menu-btn{display:flex}
+      .profile-grid{grid-template-columns:1fr}
+      .dash-content{padding:16px}
+      .profile-hero{flex-direction:column;text-align:center}
+    }
+
+    /* ── ACCESSIBILITY ── */
+    :focus-visible{outline:2px solid var(--blue-500);outline-offset:3px;border-radius:4px}
+
+    /* ── TOUCH TARGETS ── */
+    @media(max-width:768px){
+      .btn,.nav-item,.sidebar-logout{min-height:44px}
+      button{min-height:44px}
+    }
+
+    /* ── PREFERS REDUCED MOTION ── */
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">CAT</div>
+      <div>
+        <span class="logo-title">CrashCourse</span>
+        <span class="logo-sub">by CareerChoice360</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="/v3-prod/pages/dashboard.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/v3-prod/pages/live-lecture.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Live Lectures
+      </a>
+      <a href="/v3-prod/pages/recorded-lectures.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        Recorded Lectures
+      </a>
+      <div class="nav-section-label">Practice</div>
+      <a href="/v3-prod/pages/mock-tests.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Mock Tests
+      </a>
+      <a href="/v3-prod/pages/pyqs.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        PYQs
+      </a>
+      <a href="/v3-prod/pages/notes.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Notes
+      </a>
+      <div class="nav-section-label">Account</div>
+      <a href="/v3-prod/pages/profile.html" class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarLogout">
+        <div class="user-avatar" id="sidebarAvatar">—</div>
+        <div>
+          <div class="user-name" id="sidebarName">Loading…</div>
+          <div class="user-role">CAT Student</div>
+        </div>
+        <svg class="logout-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <header class="dash-header">
+      <button class="header-menu-btn" id="menuBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="header-title">My Profile</span>
+    </header>
+
+    <div class="dash-content">
+
+      <!-- Hero -->
+      <div class="profile-hero">
+        <div class="profile-big-avatar" id="bigAvatar">—</div>
+        <div class="profile-hero-info">
+          <h2 id="heroName">Loading…</h2>
+          <p id="heroEmail">—</p>
+          <div class="profile-hero-badge">
+            <span class="profile-hero-badge-dot"></span>
+            <span id="heroBadgeText">CAT 2026 Student</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="profile-grid">
+
+        <!-- Personal Info -->
+        <div class="profile-card">
+          <div class="profile-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Personal Information
+          </div>
+          <div class="form-field">
+            <label>Full Name</label>
+            <input type="text" id="fieldName" placeholder="Your full name" />
+          </div>
+          <div class="form-field">
+            <label>Email Address</label>
+            <input type="email" id="fieldEmail" readonly />
+          </div>
+          <div class="form-field">
+            <label>Phone Number</label>
+            <input type="tel" id="fieldPhone" placeholder="Your phone number" />
+          </div>
+          <div class="form-field">
+            <label>State</label>
+            <input type="text" id="fieldState" placeholder="e.g. Maharashtra" />
+          </div>
+          <button class="save-btn" id="saveProfileBtn" onclick="saveProfile()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Changes
+          </button>
+        </div>
+
+        <!-- Course Status -->
+        <div class="profile-card">
+          <div class="profile-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Course Status
+          </div>
+          <div class="status-row">
+            <span class="status-label">Access Status</span>
+            <span class="status-badge badge-active" id="accessBadge">Active</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Course</span>
+            <span class="status-value">CAT CrashCourse 2026</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Enrolled On</span>
+            <span class="status-value" id="enrolledDate">—</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Lectures Completed</span>
+            <span class="status-value" id="profileLecturesDone">0</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Mock Tests Attempted</span>
+            <span class="status-value" id="profileMocksDone">0</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Day Streak</span>
+            <span class="status-value" id="profileStreak">0 🔥</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress + Activity row -->
+      <div class="profile-grid" style="margin-bottom:20px">
+
+        <!-- Section Progress -->
+        <div class="profile-card">
+          <div class="profile-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Section Progress
+          </div>
+          <div class="progress-row">
+            <div class="progress-top"><span class="progress-subject">Quantitative Aptitude</span><span class="progress-pct" id="profQaPct">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="profQaFill" style="width:0%;background:linear-gradient(90deg,#2563eb,#60a5fa)"></div></div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-top"><span class="progress-subject">VARC</span><span class="progress-pct" id="profVarcPct">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="profVarcFill" style="width:0%;background:linear-gradient(90deg,#6d28d9,#a78bfa)"></div></div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-top"><span class="progress-subject">DILR</span><span class="progress-pct" id="profDilrPct">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="profDilrFill" style="width:0%;background:linear-gradient(90deg,#16a34a,#4ade80)"></div></div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="profile-card">
+          <div class="profile-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Recent Activity
+          </div>
+          <div id="activityList">
+            <p style="font-size:.83rem;color:var(--gray-400);text-align:center;padding:12px 0">No recent activity yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="profile-card" style="margin-bottom:20px">
+        <div class="profile-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Security
+        </div>
+        <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:4px">Password last changed: <span id="pwLastChanged">—</span></p>
+        <div class="change-pw-toggle" id="togglePwSection" onclick="togglePasswordSection()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Change password
+        </div>
+        <div class="pw-section" id="pwSection">
+          <div class="form-field"><label>New Password</label><input type="password" id="newPw" placeholder="Min. 8 characters" /></div>
+          <div class="form-field"><label>Confirm Password</label><input type="password" id="confirmPw" placeholder="Re-enter new password" /></div>
+          <button class="save-btn" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-card">
+        <div class="danger-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Sign Out
+        </div>
+        <p class="danger-desc">You will be signed out of your account on this device. Your progress and data will be saved.</p>
+        <button class="danger-btn" onclick="logout()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function toast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.style.borderColor = type==='success'?'#16a34a':type==='error'?'#dc2626':'#3b82f6';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300)},3500);
+  }
+
+  // Mobile sidebar
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  document.getElementById('menuBtn').addEventListener('click', ()=>{ sidebar.classList.add('open'); overlay.classList.add('open'); });
+  overlay.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+
+  // Toggle password section
+  function togglePasswordSection() {
+    document.getElementById('pwSection').classList.toggle('open');
+  }
+
+  // Init
+  (async function init() {
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href='/pages/login.html'; return; }
+
+    const uid = session.user.id;
+
+    // Load profile + progress in parallel
+    const [{ data: profile }, { data: progress }, { data: recentActivity }] = await Promise.all([
+      supabase.from('users').select('*').eq('id', uid).single(),
+      supabase.from('student_progress').select('*').eq('user_id', uid).single(),
+      supabase.from('lecture_progress').select('lecture_id,last_viewed_at,completed,lectures(title)').eq('user_id', uid).order('last_viewed_at',{ascending:false}).limit(5),
+    ]);
+
+    if (!profile?.course_access) { window.location.href='/pages/access-pending.html'; return; }
+
+    // Fill hero
+    const name     = profile.full_name || session.user.email;
+    const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('bigAvatar').textContent    = initials;
+    document.getElementById('heroName').textContent     = name;
+    document.getElementById('heroEmail').textContent    = profile.email || session.user.email;
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('sidebarName').textContent   = name;
+
+    // Fill form
+    document.getElementById('fieldName').value  = profile.full_name  || '';
+    document.getElementById('fieldEmail').value = profile.email      || session.user.email;
+    document.getElementById('fieldPhone').value = profile.phone      || '';
+    document.getElementById('fieldState').value = profile.state      || '';
+
+    // Course status
+    document.getElementById('enrolledDate').textContent = profile.created_at
+      ? new Date(profile.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+      : '—';
+
+    // Progress stats
+    const p = progress || {};
+    document.getElementById('profileLecturesDone').textContent = p.lectures_completed || 0;
+    document.getElementById('profileMocksDone').textContent    = p.mock_attempts      || 0;
+    document.getElementById('profileStreak').textContent       = `${p.day_streak || 0} 🔥`;
+
+    const setProg = (pct, pctId, fillId) => {
+      document.getElementById(pctId).textContent = `${pct}%`;
+      setTimeout(()=>{ document.getElementById(fillId).style.width=`${pct}%`; }, 200);
+    };
+    setProg(p.qa_progress   || 0, 'profQaPct',   'profQaFill');
+    setProg(p.varc_progress || 0, 'profVarcPct',  'profVarcFill');
+    setProg(p.dilr_progress || 0, 'profDilrPct',  'profDilrFill');
+
+    // Recent activity
+    if (recentActivity?.length) {
+      document.getElementById('activityList').innerHTML = recentActivity.map(a => `
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <div class="activity-text">${a.completed ? '✓ Completed' : 'Watched'}: ${a.lectures?.title || 'a lecture'}</div>
+            <div class="activity-time">${a.last_viewed_at ? new Date(a.last_viewed_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</div>
+          </div>
+        </div>`).join('');
+    }
+  })();
+
+  // Save profile
+  async function saveProfile() {
+    const btn = document.getElementById('saveProfileBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<span style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span> Saving…`;
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    const { error } = await supabase.from('users').update({
+      full_name: document.getElementById('fieldName').value.trim(),
+      phone:     document.getElementById('fieldPhone').value.trim(),
+      state:     document.getElementById('fieldState').value.trim(),
+      updated_at: new Date().toISOString(),
+    }).eq('id', session.user.id);
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Changes`;
+
+    if (error) { toast('Failed to save. Try again.','error'); return; }
+
+    // Update hero name
+    const newName = document.getElementById('fieldName').value.trim();
+    if (newName) {
+      document.getElementById('heroName').textContent = newName;
+      const initials = newName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      document.getElementById('bigAvatar').textContent     = initials;
+      document.getElementById('sidebarAvatar').textContent = initials;
+      document.getElementById('sidebarName').textContent   = newName;
+    }
+    toast('Profile saved successfully!', 'success');
+  }
+
+  // Change password
+  async function changePassword() {
+    const pw  = document.getElementById('newPw').value;
+    const cpw = document.getElementById('confirmPw').value;
+    if (pw.length < 8)  { toast('Password must be at least 8 characters.','error'); return; }
+    if (pw !== cpw)     { toast('Passwords do not match.','error'); return; }
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    if (error) { toast(error.message,'error'); return; }
+    toast('Password updated successfully!','success');
+    document.getElementById('newPw').value    = '';
+    document.getElementById('confirmPw').value = '';
+    document.getElementById('pwSection').classList.remove('open');
+    document.getElementById('pwLastChanged').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  }
+
+  // Logout
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = '/pages/login.html';
+  }
+
+  document.getElementById('sidebarLogout').addEventListener('click', logout);
+</script>
+</body>
+</html>

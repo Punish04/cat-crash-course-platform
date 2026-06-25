@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lecture — CAT CrashCourse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --blue-900:#0f2356;--blue-700:#1e4d9b;--blue-600:#2563eb;
+      --blue-500:#3b82f6;--blue-400:#60a5fa;--blue-100:#dbeafe;--blue-50:#eff6ff;
+      --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;
+      --gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-500:#64748b;
+      --gray-600:#475569;--gray-800:#1e293b;--gray-900:#0f172a;
+      --sidebar-w:300px;
+      --font-display:'Sora',sans-serif;--font-body:'Inter',sans-serif;
+      --radius-md:12px;--radius-lg:18px;
+      --shadow-card:0 2px 14px rgba(15,35,86,.07);
+      --t:0.2s cubic-bezier(.4,0,.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--gray-50);color:var(--gray-900);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.2}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+
+    /* ── TOP NAV ── */
+    .top-nav{background:var(--white);border-bottom:1px solid var(--gray-100);padding:0 24px;height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;box-shadow:0 1px 0 var(--gray-100)}
+    .nav-back{display:flex;align-items:center;gap:7px;font-size:.85rem;font-weight:600;color:var(--gray-500);transition:var(--t);padding:7px 12px;border-radius:9px}
+    .nav-back:hover{background:var(--gray-100);color:var(--gray-900)}
+    .nav-logo{display:flex;align-items:center;gap:9px;margin-left:4px}
+    .logo-mark{background:var(--blue-600);color:#fff;font-family:var(--font-display);font-weight:800;font-size:.75rem;padding:5px 8px;border-radius:8px}
+    .logo-title{font-family:var(--font-display);font-weight:700;font-size:.88rem;color:var(--gray-900)}
+    .nav-title{font-size:.88rem;font-weight:600;color:var(--gray-600);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+    .nav-complete-btn{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.83rem;font-weight:700;padding:8px 16px;border-radius:9px;transition:var(--t);border:none;cursor:pointer}
+    .nav-complete-btn.incomplete{background:var(--blue-600);color:#fff;box-shadow:0 3px 12px rgba(37,99,235,.22)}
+    .nav-complete-btn.incomplete:hover{background:var(--blue-700)}
+    .nav-complete-btn.done{background:var(--green-50,#f0fdf4);color:var(--green-700,#15803d);border:1.5px solid var(--green-100,#dcfce7)}
+
+    /* ── LAYOUT ── */
+    .lecture-layout{display:grid;grid-template-columns:1fr var(--sidebar-w);min-height:calc(100vh - 58px)}
+
+    /* ── VIDEO AREA ── */
+    .video-area{padding:24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+
+    /* ── LIVE CLASS BANNER ── */
+    .live-banner{display:none;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#1a3a6e,#0f2356);border-radius:var(--radius-lg);padding:20px 24px;border:1.5px solid rgba(37,99,235,.3)}
+    .live-banner.visible{display:flex}
+    .live-banner-left{display:flex;align-items:center;gap:14px}
+    .live-banner-icon{width:46px;height:46px;background:rgba(255,255,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;border:1px solid rgba(255,255,255,.15)}
+    .live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(220,38,38,.2);color:#fca5a5;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;border:1px solid rgba(220,38,38,.3)}
+    .live-badge-dot{width:5px;height:5px;background:#f87171;border-radius:50%;animation:blink 1.2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .live-banner-title{font-size:.97rem;font-weight:700;color:#fff;margin-bottom:2px}
+    .live-banner-meta{font-size:.78rem;color:rgba(255,255,255,.5)}
+    .live-countdown{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:4px}
+    .live-join-btn{background:var(--blue-500);color:#fff;padding:12px 22px;border-radius:10px;font-size:.9rem;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:var(--t);box-shadow:0 4px 18px rgba(37,99,235,.35);white-space:nowrap;text-decoration:none;flex-shrink:0}
+    .live-join-btn:hover{background:var(--blue-400);transform:translateY(-1px)}
+    .live-join-btn svg{flex-shrink:0}
+    .live-soon-badge{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;white-space:nowrap;flex-shrink:0}
+
+    /* Video player */
+    .video-wrapper{background:#000;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:16/9;width:100%;position:relative}
+    .video-wrapper iframe,.video-wrapper video{width:100%;height:100%;border:none;display:block}
+    .video-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:rgba(255,255,255,.5);font-size:.9rem}
+    .video-placeholder-icon{font-size:3rem;opacity:.5}
+
+    /* Lecture meta */
+    .lecture-meta-card{background:var(--white);border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-card);border:1px solid var(--gray-100)}
+    .lecture-subject-tag{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:10px}
+    .tag-qa{background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-100)}
+    .tag-varc{background:#f5f3ff;color:#6d28d9;border:1px solid #ede9fe}
+    .tag-dilr{background:#f0fdf4;color:#16a34a;border:1px solid #d1fae5}
+    .lecture-title{font-size:1.4rem;font-weight:800;color:var(--gray-900);margin-bottom:8px}
+    .lecture-info-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:.83rem;color:var(--gray-500)}
+    .info-item{display:flex;align-items:center;gap:6px}
+    .info-item svg{width:14px;height:14px;color:var(--gray-400)}
+
+    /* Resources */
+    .resources-card{background:var(--white);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-card);border:1px solid var(--gray-100)}
+    .resources-title{font-size:.88rem;font-weight:700;color:var(--gray-900);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .resource-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-100);transition:var(--t);margin-bottom:8px}
+    .resource-item:last-child{margin-bottom:0}
+    .resource-item:hover{border-color:var(--blue-200,#bfdbfe);background:var(--blue-50)}
+    .resource-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:var(--blue-50);flex-shrink:0}
+    .resource-name{font-size:.85rem;font-weight:600;color:var(--gray-800);flex:1}
+    .resource-type{font-size:.72rem;color:var(--gray-400);margin-top:1px}
+    .resource-download{font-size:.78rem;font-weight:600;color:var(--blue-600);padding:5px 10px;border-radius:7px;background:var(--blue-50);transition:var(--t)}
+    .resource-download:hover{background:var(--blue-100)}
+    .no-resources{font-size:.85rem;color:var(--gray-400);text-align:center;padding:16px 0}
+
+    /* Prev / Next */
+    .lecture-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .nav-card{background:var(--white);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow-card);border:1px solid var(--gray-100);transition:var(--t);display:flex;align-items:center;gap:12px;cursor:pointer}
+    .nav-card:hover{box-shadow:0 4px 20px rgba(15,35,86,.1);border-color:var(--blue-200,#bfdbfe)}
+    .nav-card.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+    .nav-card.next{flex-direction:row-reverse;text-align:right}
+    .nav-arrow{width:32px;height:32px;border-radius:8px;background:var(--gray-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gray-500)}
+    .nav-card:hover .nav-arrow{background:var(--blue-50);color:var(--blue-600)}
+    .nav-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:2px}
+    .nav-lec-title{font-size:.85rem;font-weight:600;color:var(--gray-800)}
+
+    /* ── SIDEBAR ── */
+    .course-sidebar{background:var(--white);border-left:1px solid var(--gray-100);display:flex;flex-direction:column;height:calc(100vh - 58px);position:sticky;top:58px;overflow:hidden}
+    .sidebar-head{padding:18px 18px 14px;border-bottom:1px solid var(--gray-100)}
+    .sidebar-head h3{font-size:.9rem;font-weight:700;color:var(--gray-900);margin-bottom:3px}
+    .sidebar-progress{display:flex;align-items:center;gap:10px;margin-top:10px}
+    .sidebar-progress-bar{flex:1;height:5px;background:var(--gray-100);border-radius:99px;overflow:hidden}
+    .sidebar-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue-600),var(--blue-400));border-radius:99px;transition:width .5s ease}
+    .sidebar-progress-pct{font-size:.75rem;font-weight:700;color:var(--blue-600);white-space:nowrap}
+    .sidebar-lectures{flex:1;overflow-y:auto;padding:8px}
+    .sidebar-section-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:10px 10px 5px}
+    .sidebar-lec{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:var(--t)}
+    .sidebar-lec:hover{background:var(--gray-50)}
+    .sidebar-lec.active{background:var(--blue-50);border:1px solid var(--blue-100)}
+    .lec-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--t);font-size:.65rem}
+    .lec-check.done{background:var(--green-600,#16a34a);border-color:var(--green-600,#16a34a);color:#fff}
+    .lec-check.current{border-color:var(--blue-600);background:var(--blue-600);color:#fff}
+    .lec-info{flex:1;min-width:0}
+    .lec-name{font-size:.82rem;font-weight:600;color:var(--gray-800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lec-dur{font-size:.72rem;color:var(--gray-400);margin-top:1px}
+    .sidebar-lec.active .lec-name{color:var(--blue-700)}
+
+    /* Toast */
+    .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-md);background:#fff;box-shadow:0 6px 24px rgba(15,35,86,.12);border-left:4px solid var(--blue-600);font-size:.85rem;font-weight:500;min-width:240px;animation:toastIn .3s ease}
+    .toast.success{border-color:#16a34a}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+    /* Skeleton */
+    .skeleton{background:linear-gradient(90deg,var(--gray-100) 25%,var(--gray-200) 50%,var(--gray-100) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+    @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+    /* Responsive */
+    @media(max-width:900px){
+      .lecture-layout{grid-template-columns:1fr}
+      .course-sidebar{display:none}
+    }
+    @media(max-width:600px){
+      .nav-title{display:none}
+      .lecture-nav{grid-template-columns:1fr}
+      .video-area{padding:14px}
+    }
+
+    /* ── ACCESSIBILITY ── */
+    :focus-visible{outline:2px solid var(--blue-500);outline-offset:3px;border-radius:4px}
+
+    /* ── TOUCH TARGETS ── */
+    @media(max-width:768px){
+      .btn,.nav-item,.sidebar-logout{min-height:44px}
+      button{min-height:44px}
+    }
+
+    /* ── PREFERS REDUCED MOTION ── */
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <a href="/v3-prod/pages/dashboard.html" class="nav-back">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Dashboard
+  </a>
+  <div class="nav-logo">
+    <div class="logo-mark">CAT</div>
+    <span class="logo-title">CrashCourse</span>
+  </div>
+  <span class="nav-title" id="navTitle">Loading…</span>
+  <button class="nav-complete-btn incomplete" id="completeBtn" onclick="markComplete()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="completeBtnText">Mark Complete</span>
+  </button>
+</nav>
+
+<!-- LAYOUT -->
+<div class="lecture-layout">
+
+  <!-- VIDEO + INFO -->
+  <div class="video-area">
+
+    <!-- Live Class Banner (shown only on day of class, 30 min before → 3.5h after start) -->
+    <div class="live-banner" id="liveBanner">
+      <div class="live-banner-left">
+        <div class="live-banner-icon">📡</div>
+        <div>
+          <div class="live-badge"><span class="live-badge-dot"></span>Live Today</div>
+          <div class="live-banner-title" id="liveBannerTitle">Live Class</div>
+          <div class="live-banner-meta" id="liveBannerMeta"></div>
+          <div class="live-countdown" id="liveCountdown"></div>
+        </div>
+      </div>
+      <div id="liveBannerAction"></div>
+    </div>
+
+    <!-- Video -->
+    <div class="video-wrapper" id="videoWrapper">
+      <div class="video-placeholder">
+        <div class="video-placeholder-icon">🎥</div>
+        <div>Loading lecture…</div>
+      </div>
+    </div>
+
+    <!-- Meta -->
+    <div class="lecture-meta-card">
+      <span class="lecture-subject-tag tag-qa" id="lectureTag">Loading</span>
+      <h1 class="lecture-title" id="lectureTitle"><div class="skeleton" style="height:28px;width:60%"></div></h1>
+      <div class="lecture-info-row" id="lectureInfoRow">
+        <div class="skeleton" style="height:18px;width:40%"></div>
+      </div>
+    </div>
+
+    <!-- Resources -->
+    <div class="resources-card">
+      <div class="resources-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Lecture Resources
+      </div>
+      <div id="resourcesList"><p class="no-resources">No resources for this lecture.</p></div>
+    </div>
+
+    <!-- Prev / Next -->
+    <div class="lecture-nav" id="lectureNav">
+      <div class="nav-card prev disabled" id="prevCard">
+        <div class="nav-arrow">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </div>
+        <div>
+          <div class="nav-label">Previous</div>
+          <div class="nav-lec-title" id="prevTitle">—</div>
+        </div>
+      </div>
+      <div class="nav-card next disabled" id="nextCard">
+        <div>
+          <div class="nav-label">Next</div>
+          <div class="nav-lec-title" id="nextTitle">—</div>
+        </div>
+        <div class="nav-arrow">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COURSE SIDEBAR -->
+  <aside class="course-sidebar">
+    <div class="sidebar-head">
+      <h3>Course Content</h3>
+      <p style="font-size:.75rem;color:var(--gray-400)" id="sidebarSubtitle">Loading…</p>
+      <div class="sidebar-progress">
+        <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" id="sidebarProgressFill" style="width:0%"></div></div>
+        <span class="sidebar-progress-pct" id="sidebarProgressPct">0%</span>
+      </div>
+    </div>
+    <div class="sidebar-lectures" id="sidebarLectures">
+      <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+        <div class="skeleton" style="height:44px"></div>
+        <div class="skeleton" style="height:44px"></div>
+        <div class="skeleton" style="height:44px"></div>
+        <div class="skeleton" style="height:44px"></div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentLecture = null;
+  let allLectures    = [];
+  let completedIds   = new Set();
+  let currentUserId  = null;
+
+  function toast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className=`toast ${type}`;
+    t.style.borderColor=type==='success'?'#16a34a':'#3b82f6';
+    t.textContent=msg;
+    c.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300)},3200);
+  }
+
+  // Read slug from URL
+  function getSlug() {
+    return new URLSearchParams(window.location.search).get('slug') || '';
+  }
+
+  (async function init() {
+    // Auth + access guard
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href='/pages/login.html'; return; }
+    currentUserId = session.user.id;
+
+    const { data: profile } = await supabase.from('users').select('course_access').eq('id', currentUserId).single();
+    if (!profile?.course_access) { window.location.href='/pages/access-pending.html'; return; }
+
+    // Load all lectures + completed progress
+    const [{ data: lectures }, { data: progress }] = await Promise.all([
+      supabase.from('lectures').select('*').eq('type','recorded').order('created_at'),
+      supabase.from('lecture_progress').select('lecture_id,completed').eq('user_id', currentUserId),
+    ]);
+
+    allLectures  = lectures || [];
+    completedIds = new Set((progress||[]).filter(p=>p.completed).map(p=>p.lecture_id));
+
+    // Find current lecture by slug
+    const slug = getSlug();
+    currentLecture = slug
+      ? allLectures.find(l=>l.slug===slug) || allLectures[0]
+      : allLectures[0];
+
+    if (!currentLecture) {
+      document.getElementById('lectureTitle').textContent = 'No lectures available yet.';
+      return;
+    }
+
+    renderLecture(currentLecture);
+    renderSidebar();
+    updateProgress();
+  })();
+
+  function renderLecture(lec) {
+    document.title = `${lec.title} — CAT CrashCourse`;
+    document.getElementById('navTitle').textContent = lec.title;
+
+    // Video
+    const wrapper = document.getElementById('videoWrapper');
+    if (lec.video_url) {
+      // Detect YouTube
+      if (lec.video_url.includes('youtube.com') || lec.video_url.includes('youtu.be')) {
+        const videoId = lec.video_url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1];
+        wrapper.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1" title="${lec.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      } else if (lec.video_url.includes('vimeo.com')) {
+        const vimeoId = lec.video_url.match(/vimeo\.com\/(\d+)/)?.[1];
+        wrapper.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}" title="${lec.title}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+      } else {
+        // Private Supabase Storage video — raw video_url is NOT directly playable
+        // (the "videos" bucket is private). Show a loading state, fetch a
+        // short-lived signed URL via the Edge Function, then render the player.
+        wrapper.innerHTML = `<div class="video-placeholder"><div class="video-placeholder-icon">⏳</div><div>Loading secure video…</div></div>`;
+        loadSignedVideo(lec, wrapper);
+      }
+    } else {
+      wrapper.innerHTML = `<div class="video-placeholder"><div class="video-placeholder-icon">🎥</div><div>Video not available yet.</div></div>`;
+    }
+
+    // Tag
+    const tagEl = document.getElementById('lectureTag');
+    const tagMap = { QA:'tag-qa', VARC:'tag-varc', DILR:'tag-dilr' };
+    tagEl.className = `lecture-subject-tag ${tagMap[lec.category]||'tag-qa'}`;
+    tagEl.textContent = lec.category || 'General';
+
+    // Title + info
+    document.getElementById('lectureTitle').textContent = lec.title;
+    document.getElementById('lectureInfoRow').innerHTML = `
+      ${lec.faculty ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${lec.faculty}</div>` : ''}
+      ${lec.duration ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${lec.duration}</div>` : ''}
+      <div class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Lecture ${allLectures.findIndex(l=>l.id===lec.id)+1} of ${allLectures.length}</div>`;
+
+    // Resources
+    const resourcesEl = document.getElementById('resourcesList');
+    if (lec.resources && Array.isArray(lec.resources) && lec.resources.length > 0) {
+      resourcesEl.innerHTML = lec.resources.map(r=>`
+        <div class="resource-item">
+          <div class="resource-icon">📄</div>
+          <div class="resource-info"><div class="resource-name">${r.name}</div><div class="resource-type">${r.type||'PDF'}</div></div>
+          <a href="${r.url}" target="_blank" download class="resource-download">Download</a>
+        </div>`).join('');
+    } else {
+      resourcesEl.innerHTML = `<p class="no-resources">No resources attached to this lecture.</p>`;
+    }
+
+    // Prev / Next
+    const idx  = allLectures.findIndex(l=>l.id===lec.id);
+    const prev = allLectures[idx-1];
+    const next = allLectures[idx+1];
+    const prevCard = document.getElementById('prevCard');
+    const nextCard = document.getElementById('nextCard');
+
+    if (prev) {
+      prevCard.classList.remove('disabled');
+      document.getElementById('prevTitle').textContent = prev.title;
+      prevCard.onclick = () => goToLecture(prev.slug);
+    } else {
+      prevCard.classList.add('disabled');
+      document.getElementById('prevTitle').textContent = 'First lecture';
+    }
+    if (next) {
+      nextCard.classList.remove('disabled');
+      document.getElementById('nextTitle').textContent = next.title;
+      nextCard.onclick = () => goToLecture(next.slug);
+    } else {
+      nextCard.classList.add('disabled');
+      document.getElementById('nextTitle').textContent = 'Last lecture';
+    }
+
+    // Complete button state
+    const isDone = completedIds.has(lec.id);
+    const btn = document.getElementById('completeBtn');
+    btn.className = `nav-complete-btn ${isDone ? 'done' : 'incomplete'}`;
+    document.getElementById('completeBtnText').textContent = isDone ? '✓ Completed' : 'Mark Complete';
+
+    // Save last viewed
+    saveLastViewed(lec.id);
+  }
+
+  // ── LIVE CLASS BANNER LOGIC ────────────────────────────────────
+  // Checks if there is a live lecture scheduled for today.
+  // Shows the banner 30 minutes before start time.
+  // Shows "Join" button from start time until 3h 30min after (class end).
+  // Hides the banner entirely outside this window.
+
+  async function checkLiveClass() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const { data: liveClasses } = await supabase
+      .from('lectures')
+      .select('title, faculty, time, join_link, date')
+      .eq('type', 'live')
+      .eq('date', today)
+      .eq('published', true)
+      .limit(1);
+
+    if (!liveClasses || liveClasses.length === 0) return; // no class today
+    const cls = liveClasses[0];
+    if (!cls.time || !cls.join_link) return; // no time or link set
+
+    // Parse scheduled time (stored as "HH:MM", IST)
+    // We compare using the user's local clock — assumes students are in IST
+    const [hh, mm] = cls.time.split(':').map(Number);
+    const now        = new Date();
+    const classStart = new Date(now);
+    classStart.setHours(hh, mm, 0, 0);
+
+    const THIRTY_MIN  = 30 * 60 * 1000;
+    const THREE_H_30  = (3 * 60 + 30) * 60 * 1000; // 210 minutes = class end buffer
+
+    const windowStart = new Date(classStart.getTime() - THIRTY_MIN);  // 30 min before
+    const windowEnd   = new Date(classStart.getTime() + THREE_H_30);  // 3.5h after start
+
+    // Outside window — don't show banner
+    if (now < windowStart || now > windowEnd) return;
+
+    // Fill banner content
+    document.getElementById('liveBannerTitle').textContent = cls.title;
+    document.getElementById('liveBannerMeta').textContent =
+      `${cls.faculty ? cls.faculty + ' · ' : ''}${cls.time} IST`;
+
+    const banner = document.getElementById('liveBanner');
+    banner.classList.add('visible');
+
+    const actionEl = document.getElementById('liveBannerAction');
+
+    if (now < classStart) {
+      // Before class start — show "Starting Soon" badge + countdown
+      actionEl.innerHTML = `<div class="live-soon-badge">⏰ Starting Soon</div>`;
+      updateCountdown(classStart);
+    } else {
+      // Class is live — show Join button
+      document.getElementById('liveCountdown').textContent = 'Class is live now!';
+      actionEl.innerHTML = `
+        <a href="${cls.join_link}" target="_blank" rel="noopener" class="live-join-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.82v6.36a1 1 0 0 1-1.447.888L15 14M3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/></svg>
+          Join Live Class
+        </a>`;
+    }
+  }
+
+  function updateCountdown(classStart) {
+    const el = document.getElementById('liveCountdown');
+    const tick = () => {
+      const diff = classStart - new Date();
+      if (diff <= 0) {
+        // Class started — reload to show Join button
+        window.location.reload();
+        return;
+      }
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      el.textContent = `Starts in ${mins}m ${secs}s`;
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // Run live class check on page load
+  checkLiveClass();
+
+  // Recheck every 5 minutes in case student has the page open before window opens
+  setInterval(checkLiveClass, 5 * 60 * 1000);
+
+  // Fetches a short-lived signed URL for a private-storage video via the
+  // get-signed-video-url Edge Function (auth-checked + course_access-checked
+  // server-side), then renders the <video> tag. Falls back to an error
+  // state if the request fails (expired session, no access, bad path, etc).
+  async function loadSignedVideo(lec, wrapper) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { window.location.href = '/pages/login.html'; return; }
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/get-signed-video-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ videoPath: lec.video_url }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.url) throw new Error(result.error || 'Could not load video.');
+
+      // Only render if this is still the lecture currently being viewed
+      // (guards against a race if the student navigates away while loading)
+      if (currentLecture?.id === lec.id) {
+        wrapper.innerHTML = `<video controls controlsList="nodownload" src="${result.url}" style="width:100%;height:100%;background:#000"></video>`;
+      }
+    } catch (err) {
+      wrapper.innerHTML = `<div class="video-placeholder"><div class="video-placeholder-icon">⚠️</div><div>Couldn't load this video. Please refresh or contact support.</div></div>`;
+    }
+  }
+
+  function renderSidebar() {
+    const container = document.getElementById('sidebarLectures');
+    const categories = ['QA', 'VARC', 'DILR'];
+    let html = '';
+
+    categories.forEach(cat => {
+      const catLecs = allLectures.filter(l=>l.category===cat);
+      if (!catLecs.length) return;
+      const catNames = { QA:'Quantitative Aptitude', VARC:'Verbal & RC', DILR:'Data Interpretation & LR' };
+      html += `<div class="sidebar-section-label">${catNames[cat]||cat}</div>`;
+      catLecs.forEach(l => {
+        const isDone    = completedIds.has(l.id);
+        const isCurrent = currentLecture?.id === l.id;
+        html += `
+          <div class="sidebar-lec ${isCurrent?'active':''}" onclick="goToLecture('${l.slug}')">
+            <div class="lec-check ${isDone?'done':isCurrent?'current':''}">
+              ${isDone ? '✓' : isCurrent ? '▶' : ''}
+            </div>
+            <div class="lec-info">
+              <div class="lec-name">${l.title}</div>
+              <div class="lec-dur">${l.duration||''}</div>
+            </div>
+          </div>`;
+      });
+    });
+
+    // Lectures with no category
+    const uncategorised = allLectures.filter(l=>!['QA','VARC','DILR'].includes(l.category));
+    if (uncategorised.length) {
+      html += `<div class="sidebar-section-label">Other</div>`;
+      uncategorised.forEach(l => {
+        const isDone    = completedIds.has(l.id);
+        const isCurrent = currentLecture?.id === l.id;
+        html += `
+          <div class="sidebar-lec ${isCurrent?'active':''}" onclick="goToLecture('${l.slug}')">
+            <div class="lec-check ${isDone?'done':isCurrent?'current':''}">${isDone?'✓':isCurrent?'▶':''}</div>
+            <div class="lec-info"><div class="lec-name">${l.title}</div><div class="lec-dur">${l.duration||''}</div></div>
+          </div>`;
+      });
+    }
+
+    container.innerHTML = html || '<p style="padding:16px;font-size:.83rem;color:var(--gray-400)">No lectures yet.</p>';
+  }
+
+  function updateProgress() {
+    const pct = allLectures.length ? Math.round((completedIds.size/allLectures.length)*100) : 0;
+    document.getElementById('sidebarProgressFill').style.width = `${pct}%`;
+    document.getElementById('sidebarProgressPct').textContent  = `${pct}%`;
+    document.getElementById('sidebarSubtitle').textContent = `${completedIds.size} / ${allLectures.length} completed`;
+  }
+
+  function goToLecture(slug) {
+    window.location.href = `/pages/lecture.html?slug=${slug}`;
+  }
+
+  async function markComplete() {
+    if (!currentLecture || !currentUserId) return;
+    const isDone = completedIds.has(currentLecture.id);
+
+    const { error } = await supabase.from('lecture_progress').upsert({
+      user_id:    currentUserId,
+      lecture_id: currentLecture.id,
+      completed:  !isDone,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (error) { toast('Error saving progress.','error'); return; }
+
+    if (isDone) completedIds.delete(currentLecture.id);
+    else        completedIds.add(currentLecture.id);
+
+    const btn = document.getElementById('completeBtn');
+    btn.className = `nav-complete-btn ${completedIds.has(currentLecture.id)?'done':'incomplete'}`;
+    document.getElementById('completeBtnText').textContent = completedIds.has(currentLecture.id) ? '✓ Completed' : 'Mark Complete';
+
+    toast(completedIds.has(currentLecture.id) ? '✓ Marked as complete!' : 'Marked as incomplete', 'success');
+    updateProgress();
+    renderSidebar();
+
+    // NOTE: student_progress is intentionally NOT written here.
+    // It's read-only for students (see schema.sql RLS policies) and is
+    // recalculated automatically server-side by a trigger on lecture_progress,
+    // so it can't be tampered with from the browser. The upsert above is enough.
+  }
+
+  async function saveLastViewed(lectureId) {
+    await supabase.from('lecture_progress').upsert({
+      user_id:       currentUserId,
+      lecture_id:    lectureId,
+      last_viewed_at: new Date().toISOString(),
+    });
+  }
+</script>
+</body>
+</html>

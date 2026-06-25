@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Login — CAT CrashCourse 2026 by CareerChoice360</title>
+  <meta name="description" content="Login to your CAT CrashCourse student dashboard." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://careerchoice360.in/pages/login.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Supabase CDN -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --blue-900:#0f2356;--blue-800:#1a3a6e;--blue-700:#1e4d9b;
+      --blue-600:#2563eb;--blue-500:#3b82f6;--blue-400:#60a5fa;
+      --blue-100:#dbeafe;--blue-50:#eff6ff;
+      --white:#ffffff;--gray-50:#f8fafc;--gray-100:#f1f5f9;
+      --gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;
+      --gray-800:#1e293b;--gray-900:#0f172a;
+      --font-display:'Sora',sans-serif;--font-body:'Inter',sans-serif;
+      --radius-md:12px;--radius-lg:20px;--radius-xl:32px;
+      --shadow-card:0 2px 16px rgba(15,35,86,.08);
+      --shadow-hover:0 8px 32px rgba(15,35,86,.14);
+      --shadow-blue:0 8px 32px rgba(37,99,235,.22);
+      --t:0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-body);background:var(--white);color:var(--gray-900);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.2}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+
+    /* ── PAGE LAYOUT ── */
+    .login-page{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+
+    /* ── LEFT PANEL (branding) ── */
+    .login-left{background:linear-gradient(155deg,var(--blue-800),var(--blue-900));padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .login-left::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%);pointer-events:none}
+    .login-left::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(37,99,235,.2),transparent 70%);pointer-events:none}
+
+    .login-logo{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+    .logo-mark{background:rgba(255,255,255,.15);color:#fff;font-family:var(--font-display);font-weight:800;font-size:.9rem;padding:9px 12px;border-radius:12px;letter-spacing:.04em;backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.2)}
+    .logo-title{display:block;font-family:var(--font-display);font-weight:700;font-size:1.1rem;color:#fff}
+    .logo-sub{display:block;font-size:.73rem;color:rgba(255,255,255,.5)}
+
+    .login-brand-body{position:relative;z-index:1}
+    .login-brand-tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-400);background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.25);padding:5px 14px;border-radius:99px;margin-bottom:20px}
+    .login-brand-title{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:20px}
+    .login-brand-title span{color:var(--blue-400)}
+    .login-brand-sub{font-size:.95rem;color:rgba(255,255,255,.65);line-height:1.75;margin-bottom:36px;max-width:400px}
+
+    .login-features{display:flex;flex-direction:column;gap:14px}
+    .login-feature{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.06);border-radius:var(--radius-md);border:1px solid rgba(255,255,255,.08)}
+    .feature-icon{width:38px;height:38px;background:rgba(37,99,235,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
+    .feature-text strong{display:block;font-size:.88rem;font-weight:600;color:#fff}
+    .feature-text span{font-size:.78rem;color:rgba(255,255,255,.5)}
+
+    .login-left-footer{font-size:.78rem;color:rgba(255,255,255,.35);position:relative;z-index:1}
+
+    /* ── RIGHT PANEL (form) ── */
+    .login-right{display:flex;align-items:center;justify-content:center;padding:48px 40px;background:var(--white)}
+    .login-form-wrap{width:100%;max-width:420px}
+
+    .form-back{display:inline-flex;align-items:center;gap:6px;font-size:.83rem;color:var(--gray-400);margin-bottom:36px;transition:var(--t)}
+    .form-back:hover{color:var(--blue-600)}
+    .form-back svg{width:14px;height:14px}
+
+    .form-heading{margin-bottom:8px;font-size:1.75rem;font-weight:800;color:var(--gray-900)}
+    .form-sub{font-size:.9rem;color:var(--gray-500);margin-bottom:36px;line-height:1.6}
+
+    /* Form fields */
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+    .field label{font-size:.83rem;font-weight:600;color:var(--gray-700)}
+    .field-wrap{position:relative}
+    .field-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray-400);pointer-events:none;width:17px;height:17px}
+    .field input{width:100%;padding:13px 14px 13px 42px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:.93rem;font-family:var(--font-body);color:var(--gray-900);background:#fff;transition:var(--t);outline:none}
+    .field input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+    .field input.error{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+    .field input::placeholder{color:var(--gray-400)}
+    .password-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray-400);transition:var(--t);background:none;border:none;padding:4px}
+    .password-toggle:hover{color:var(--blue-600)}
+    .field-error{font-size:.78rem;color:#ef4444;margin-top:2px;display:none}
+    .field-error.visible{display:block}
+
+    .form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .form-remember{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.83rem;color:var(--gray-600)}
+    .form-remember input[type="checkbox"]{width:15px;height:15px;accent-color:var(--blue-600);cursor:pointer}
+    .forgot-link{font-size:.83rem;font-weight:600;color:var(--blue-600);transition:var(--t)}
+    .forgot-link:hover{color:var(--blue-800)}
+
+    /* Submit button */
+    .btn-submit{width:100%;padding:14px;background:var(--blue-600);color:#fff;border-radius:var(--radius-md);font-size:.97rem;font-weight:700;font-family:var(--font-display);transition:var(--t);display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow-blue);position:relative;overflow:hidden}
+    .btn-submit:hover:not(:disabled){background:var(--blue-700);transform:translateY(-1px);box-shadow:0 10px 32px rgba(37,99,235,.3)}
+    .btn-submit:disabled{opacity:.7;cursor:not-allowed;transform:none}
+    .btn-submit .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Alert box */
+    .form-alert{padding:14px 16px;border-radius:var(--radius-md);font-size:.87rem;font-weight:500;margin-bottom:20px;display:none;align-items:center;gap:10px;border-left:4px solid}
+    .form-alert.visible{display:flex}
+    .form-alert.error{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+    .form-alert.success{background:#f0fdf4;border-color:#16a34a;color:#166534}
+
+    .form-divider{display:flex;align-items:center;gap:14px;margin:24px 0;color:var(--gray-300);font-size:.82rem}
+    .form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+
+    .enroll-prompt{text-align:center;padding:16px;background:var(--blue-50);border-radius:var(--radius-md);border:1.5px solid var(--blue-100)}
+    .enroll-prompt p{font-size:.85rem;color:var(--gray-600);line-height:1.6}
+    .enroll-prompt a{color:var(--blue-600);font-weight:700}
+    .enroll-prompt a:hover{text-decoration:underline}
+
+    /* Forgot password modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,35,86,.45);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#fff;border-radius:var(--radius-xl);padding:36px;max-width:400px;width:100%;position:relative;box-shadow:0 24px 64px rgba(15,35,86,.2)}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:var(--gray-100);color:var(--gray-500);display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:var(--t)}
+    .modal-close:hover{background:var(--gray-200)}
+    .modal-title{font-size:1.2rem;font-weight:700;margin-bottom:8px}
+    .modal-sub{font-size:.85rem;color:var(--gray-500);margin-bottom:24px;line-height:1.6}
+    .modal-btn{width:100%;padding:13px;background:var(--blue-600);color:#fff;border-radius:var(--radius-md);font-size:.93rem;font-weight:700;font-family:var(--font-body);transition:var(--t);display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow-blue)}
+    .modal-btn:hover:not(:disabled){background:var(--blue-700)}
+    .modal-btn:disabled{opacity:.7;cursor:not-allowed}
+
+    /* Toast */
+    .toast-container{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+    .toast{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:var(--radius-md);background:#fff;box-shadow:var(--shadow-hover);border-left:4px solid var(--blue-600);font-size:.87rem;font-weight:500;min-width:260px;animation:toastIn .3s ease}
+    .toast.success{border-color:#16a34a}
+    .toast.error{border-color:#ef4444}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .login-page{grid-template-columns:1fr;min-height:auto}
+      .login-left{padding:32px 24px;min-height:auto}
+      .login-brand-body{display:none}
+      .login-left-footer{display:none}
+      .login-right{padding:36px 24px}
+    }
+
+    /* ── ACCESSIBILITY ── */
+    :focus-visible{outline:2px solid var(--blue-500);outline-offset:3px;border-radius:4px}
+
+    /* ── TOUCH TARGETS ── */
+    @media(max-width:768px){
+      .btn,.nav-item,.sidebar-logout{min-height:44px}
+      button{min-height:44px}
+    }
+
+    /* ── PREFERS REDUCED MOTION ── */
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-page">
+
+  <!-- LEFT — Branding -->
+  <div class="login-left">
+    <!-- Logo -->
+    <a href="/v3-prod/index.html" class="login-logo">
+      <div class="logo-mark">CAT</div>
+      <div>
+        <span class="logo-title">CrashCourse</span>
+        <span class="logo-sub">by CareerChoice360</span>
+      </div>
+    </a>
+
+    <!-- Brand copy -->
+    <div class="login-brand-body">
+      <div class="login-brand-tag">Student Portal</div>
+      <h2 class="login-brand-title">Your CAT journey<br>starts <span>right here</span></h2>
+      <p class="login-brand-sub">Access your live sessions, recorded lectures, mock tests, and study material — all in one place.</p>
+      <div class="login-features">
+        <div class="login-feature">
+          <div class="feature-icon">🎥</div>
+          <div class="feature-text">
+            <strong>Live & Recorded Lectures</strong>
+            <span>60+ sessions across QA, VARC & DILR</span>
+          </div>
+        </div>
+        <div class="login-feature">
+          <div class="feature-icon">📝</div>
+          <div class="feature-text">
+            <strong>Mock Tests & Analytics</strong>
+            <span>10 full CAT-pattern mocks with detailed feedback</span>
+          </div>
+        </div>
+        <div class="login-feature">
+          <div class="feature-icon">📚</div>
+          <div class="feature-text">
+            <strong>Notes & PYQs</strong>
+            <span>Curated PDFs, formula sheets & previous papers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-left-footer">© 2026 CareerChoice360. All rights reserved.</div>
+  </div>
+
+  <!-- RIGHT — Form -->
+  <div class="login-right">
+    <div class="login-form-wrap">
+
+      <a href="/" class="form-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to home
+      </a>
+
+      <h1 class="form-heading">Welcome back 👋</h1>
+      <p class="form-sub">Enter your credentials to access your dashboard.</p>
+
+      <!-- Alert -->
+      <div class="form-alert" id="formAlert" role="alert"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm" novalidate>
+
+        <!-- Email -->
+        <div class="field">
+          <label for="email">Email Address</label>
+          <div class="field-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <span class="field-error" id="emailError">Please enter a valid email address.</span>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="field-error" id="passwordError">Password must be at least 6 characters.</span>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="form-row">
+          <label class="form-remember">
+            <input type="checkbox" id="rememberMe" />
+            Remember me
+          </label>
+          <button type="button" class="forgot-link" id="forgotBtn">Forgot password?</button>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="submitText">Login to Dashboard</span>
+        </button>
+
+      </form>
+
+      <div class="form-divider">or</div>
+
+      <!-- Enroll prompt -->
+      <div class="enroll-prompt">
+        <p>Don't have an account yet?<br>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfk8ifpCZnmdp6JjYkG7W3EpAYPYLWWdxQcqx9T6PGZG4NVbA/viewform">Enroll in the course</a> and we'll set up your account after payment verification.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgotModal" role="dialog" aria-modal="true" aria-label="Reset password">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    <h3 class="modal-title">Reset your password</h3>
+    <p class="modal-sub">Enter your registered email and we'll send you a link to set a new password.</p>
+
+    <div class="form-alert" id="resetAlert" role="alert"></div>
+
+    <div class="field">
+      <label for="resetEmail">Email Address</label>
+      <div class="field-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input type="email" id="resetEmail" placeholder="you@example.com" />
+      </div>
+    </div>
+
+    <button class="modal-btn" id="resetBtn">
+      <span id="resetText">Send Reset Link</span>
+    </button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ─── SCRIPTS ─── -->
+<script>
+// ── CONFIG — REPLACE THESE ──────────────────────────────────────────────────
+const SUPABASE_URL     = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// ────────────────────────────────────────────────────────────────────────────
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── TOAST ──
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icons[type] || '•'}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(20px)';
+    toast.style.transition = '.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ── ALERT ──
+function showAlert(id, message, type) {
+  const el = document.getElementById(id);
+  el.textContent = message;
+  el.className = `form-alert ${type} visible`;
+}
+function hideAlert(id) {
+  document.getElementById(id).className = 'form-alert';
+}
+
+// ── FIELD VALIDATION ──
+function validateEmail(val) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val); }
+function setFieldError(inputId, errorId, show) {
+  const input = document.getElementById(inputId);
+  const error = document.getElementById(errorId);
+  if (show) {
+    input.classList.add('error');
+    error.classList.add('visible');
+  } else {
+    input.classList.remove('error');
+    error.classList.remove('visible');
+  }
+}
+
+// ── PASSWORD TOGGLE ──
+const passwordInput  = document.getElementById('password');
+const passwordToggle = document.getElementById('passwordToggle');
+const eyeIcon        = document.getElementById('eyeIcon');
+
+passwordToggle.addEventListener('click', () => {
+  const isPassword = passwordInput.type === 'password';
+  passwordInput.type = isPassword ? 'text' : 'password';
+  eyeIcon.innerHTML = isPassword
+    ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`
+    : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+});
+
+// ── LOADING STATE ──
+function setLoading(btnId, textId, loading, defaultText) {
+  const btn  = document.getElementById(btnId);
+  const text = document.getElementById(textId);
+  btn.disabled = loading;
+  text.innerHTML = loading
+    ? `<span class="spinner"></span> Verifying...`
+    : defaultText;
+}
+
+// ── LOGIN FORM ──
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert('formAlert');
+
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  let valid = true;
+
+  // Validate
+  if (!validateEmail(email)) { setFieldError('email', 'emailError', true); valid = false; }
+  else setFieldError('email', 'emailError', false);
+
+  if (password.length < 6) { setFieldError('password', 'passwordError', true); valid = false; }
+  else setFieldError('password', 'passwordError', false);
+
+  if (!valid) return;
+
+  setLoading('submitBtn', 'submitText', true, 'Login to Dashboard');
+
+  try {
+    // 1. Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) throw error;
+
+    const user = data.user;
+
+    // 2. Check course access in users table
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('course_access, full_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      // Profile not found — could be first login edge case
+      showAlert('formAlert', 'Your account was found but profile data is missing. Please contact support.', 'error');
+      await supabase.auth.signOut();
+      return;
+    }
+
+    showToast(`Welcome back${profile.full_name ? ', ' + profile.full_name.split(' ')[0] : ''}! 👋`, 'success');
+
+    // 3. Check if admin → redirect to admin panel, else route by access
+    const { data: adminRow } = await supabase
+      .from('admins')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    setTimeout(() => {
+      if (adminRow) {
+        window.location.href = '/admin/index.html';
+      } else if (profile.course_access) {
+        window.location.href = '/pages/dashboard.html';
+      } else {
+        window.location.href = '/pages/access-pending.html';
+      }
+    }, 800);
+
+  } catch (err) {
+    console.error('Login error:', err);
+    const messages = {
+      'Invalid login credentials': 'Incorrect email or password. Please try again.',
+      'Email not confirmed':       'Please verify your email before logging in.',
+      'Too many requests':         'Too many attempts. Please wait a moment and try again.',
+    };
+    const msg = messages[err.message] || 'Something went wrong. Please try again.';
+    showAlert('formAlert', msg, 'error');
+  } finally {
+    setLoading('submitBtn', 'submitText', false, 'Login to Dashboard');
+  }
+});
+
+// ── FORGOT PASSWORD MODAL ──
+const forgotModal = document.getElementById('forgotModal');
+document.getElementById('forgotBtn').addEventListener('click', () => forgotModal.classList.add('open'));
+document.getElementById('modalClose').addEventListener('click', () => {
+  forgotModal.classList.remove('open');
+  hideAlert('resetAlert');
+  document.getElementById('resetEmail').value = '';
+});
+forgotModal.addEventListener('click', (e) => {
+  if (e.target === forgotModal) {
+    forgotModal.classList.remove('open');
+    hideAlert('resetAlert');
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', async () => {
+  const email = document.getElementById('resetEmail').value.trim();
+  hideAlert('resetAlert');
+
+  if (!validateEmail(email)) {
+    showAlert('resetAlert', 'Please enter a valid email address.', 'error');
+    return;
+  }
+
+  const btn  = document.getElementById('resetBtn');
+  const text = document.getElementById('resetText');
+  btn.disabled = true;
+  text.innerHTML = `<span class="spinner" style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span> Sending...`;
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/pages/set-password.html`,
+    });
+    if (error) throw error;
+
+    showAlert('resetAlert', '✓ Reset link sent! Check your inbox (and spam folder).', 'success');
+    text.innerHTML = 'Email Sent!';
+    setTimeout(() => {
+      forgotModal.classList.remove('open');
+      hideAlert('resetAlert');
+      document.getElementById('resetEmail').value = '';
+      text.innerHTML = 'Send Reset Link';
+      btn.disabled = false;
+    }, 3000);
+
+  } catch (err) {
+    showAlert('resetAlert', err.message || 'Failed to send reset email. Please try again.', 'error');
+    text.innerHTML = 'Send Reset Link';
+    btn.disabled = false;
+  }
+});
+
+// ── AUTH STATE CHECK ──
+// If already logged in, redirect away from login page
+(async function checkExistingSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('course_access')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.course_access) {
+      window.location.href = '/pages/dashboard.html';
+    } else {
+      window.location.href = '/pages/access-pending.html';
+    }
+  }
+})();
+</script>
+
+</body>
+</html>

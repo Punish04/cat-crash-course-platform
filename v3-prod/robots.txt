@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /pages/login.html
+Allow: /pages/access-pending.html
+Disallow: /pages/dashboard.html
+Disallow: /pages/lecture.html
+Disallow: /pages/recorded-lectures.html
+Disallow: /pages/notes.html
+Disallow: /pages/mock-tests.html
+Disallow: /pages/pyqs.html
+Disallow: /pages/profile.html
+Disallow: /pages/set-password.html
+Disallow: /admin/
+Disallow: /supabase/
+Disallow: /services/
+Disallow: /google-apps-script/
+
+Sitemap: https://careerchoice360.in/sitemap.xml

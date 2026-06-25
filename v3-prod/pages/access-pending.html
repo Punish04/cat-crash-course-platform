@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Pending — CAT CrashCourse 2026</title>
+  <meta name="description" content="Your CAT CrashCourse enrollment is under verification. We will grant access within 24 hours of payment confirmation." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://careerchoice360.in/pages/access-pending.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --blue-900:#0f2356;--blue-700:#1e4d9b;--blue-600:#2563eb;
+      --blue-500:#3b82f6;--blue-400:#60a5fa;--blue-100:#dbeafe;--blue-50:#eff6ff;
+      --white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+      --gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;
+      --font-display:'Sora',sans-serif;--font-body:'Inter',sans-serif;
+      --radius-md:12px;--radius-lg:20px;--radius-xl:32px;
+      --shadow-card:0 2px 16px rgba(15,35,86,.08);
+      --shadow-hover:0 8px 32px rgba(15,35,86,.14);
+      --t:0.22s cubic-bezier(.4,0,.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--gray-50);color:var(--gray-900);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--font-display);font-weight:700}
+    a{text-decoration:none;color:inherit}
+
+    /* NAV */
+    .top-nav{background:#fff;border-bottom:1px solid var(--gray-100);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+    .nav-logo{display:flex;align-items:center;gap:10px}
+    .logo-mark{background:var(--blue-600);color:#fff;font-family:var(--font-display);font-weight:800;font-size:.82rem;padding:7px 10px;border-radius:10px}
+    .logo-title{font-family:var(--font-display);font-weight:700;font-size:.95rem}
+    .logout-btn{font-size:.83rem;font-weight:600;color:var(--gray-400);cursor:pointer;transition:var(--t);background:none;border:none}
+    .logout-btn:hover{color:#ef4444}
+
+    /* MAIN */
+    main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 24px}
+    .pending-card{background:#fff;border-radius:var(--radius-xl);padding:56px 48px;max-width:560px;width:100%;text-align:center;box-shadow:var(--shadow-hover);border:1px solid var(--gray-100)}
+
+    .pending-icon{width:80px;height:80px;background:linear-gradient(135deg,var(--blue-50),var(--blue-100));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:2.4rem}
+    .pending-badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#d97706;background:#fef3c7;border:1.5px solid #fde68a;padding:5px 14px;border-radius:99px;margin-bottom:20px}
+    .pending-title{font-size:1.8rem;font-weight:800;color:var(--gray-900);margin-bottom:14px}
+    .pending-sub{font-size:.95rem;color:var(--gray-600);line-height:1.75;margin-bottom:36px}
+
+    .steps-list{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;text-align:left}
+    .step-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--gray-50);border-radius:var(--radius-md);border:1px solid var(--gray-100)}
+    .step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+    .step-dot.done{background:#d1fae5;color:#065f46}
+    .step-dot.pending{background:#fef3c7;color:#92400e}
+    .step-dot.wait{background:var(--gray-100);color:var(--gray-400)}
+    .step-label{font-size:.88rem;font-weight:500;color:var(--gray-700)}
+    .step-label span{font-size:.78rem;color:var(--gray-400);display:block;margin-top:1px}
+
+    .pending-actions{display:flex;flex-direction:column;gap:12px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:var(--radius-md);font-size:.93rem;font-weight:600;transition:var(--t);font-family:var(--font-body);cursor:pointer;border:none;width:100%}
+    .btn-ghost{background:transparent;color:var(--gray-500);border:1.5px solid var(--gray-200)}
+    .btn-ghost:hover{border-color:var(--gray-300);color:var(--gray-700)}
+
+    .refresh-note{font-size:.78rem;color:var(--gray-400);margin-top:16px;line-height:1.6}
+    .enroll-note{font-size:.82rem;color:var(--gray-500);margin-top:20px;padding-top:20px;border-top:1px solid var(--gray-100);line-height:1.6}
+    .enroll-note a{color:var(--blue-600);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+    .enroll-note a:hover{color:var(--blue-700)}
+
+    /* Toast */
+    .toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:10px}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:var(--radius-md);background:#fff;box-shadow:var(--shadow-hover);border-left:4px solid var(--blue-600);font-size:.87rem;font-weight:500;animation:toastIn .3s ease}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+    /* ── ACCESSIBILITY ── */
+    :focus-visible{outline:2px solid var(--blue-500);outline-offset:3px;border-radius:4px}
+
+    /* ── TOUCH TARGETS ── */
+    @media(max-width:768px){
+      .btn,.nav-item,.sidebar-logout{min-height:44px}
+      button{min-height:44px}
+    }
+
+    /* ── PREFERS REDUCED MOTION ── */
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">
+      <div class="logo-mark">CAT</div>
+      <span class="logo-title">CrashCourse</span>
+    </div>
+    <button class="logout-btn" id="logoutBtn" style="display:none">Logout</button>
+  </nav>
+
+  <main>
+    <div class="pending-card">
+      <div class="pending-icon">⏳</div>
+      <span class="pending-badge">Verification Pending</span>
+      <h1 class="pending-title">Your access is being set up</h1>
+      <p class="pending-sub">
+        We've received your enrollment and are currently verifying your payment.
+        Once approved, you'll receive an email to set your password and access your dashboard.
+      </p>
+
+      <div class="steps-list">
+        <div class="step-row">
+          <div class="step-dot done">✓</div>
+          <div class="step-label">Enrollment form submitted <span>Completed</span></div>
+        </div>
+        <div class="step-row">
+          <div class="step-dot done">✓</div>
+          <div class="step-label">Payment screenshot uploaded <span>Completed</span></div>
+        </div>
+        <div class="step-row">
+          <div class="step-dot pending">⏳</div>
+          <div class="step-label">Admin verification <span>In progress — usually within 24 hours</span></div>
+        </div>
+        <div class="step-row">
+          <div class="step-dot wait">4</div>
+          <div class="step-label">Dashboard access granted <span>After verification</span></div>
+        </div>
+      </div>
+
+      <div class="pending-actions">
+        <a href="mailto:info.careerchoice360@gmail.com" class="btn btn-ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contact Support
+        </a>
+      </div>
+
+      <p class="refresh-note">Access is typically granted within 24 hours of payment submission.</p>
+
+      <p class="enroll-note">
+        Haven't enrolled in CAT CrashCourse yet?
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfk8ifpCZnmdp6JjYkG7W3EpAYPYLWWdxQcqx9T6PGZG4NVbA/viewform" target="_blank" rel="noopener">
+          Fill the enrollment form here
+        </a>
+        and start your CAT preparation journey today.
+      </p>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (async () => {
+      const { data:{ session } } = await supabase.auth.getSession();
+
+      // If logged in, show logout button
+      if (session) {
+        document.getElementById('logoutBtn').style.display = 'block';
+
+        // If already approved → send straight to dashboard
+        const { data: profile } = await supabase
+          .from('users')
+          .select('course_access')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.course_access) {
+          window.location.href = '/pages/dashboard.html';
+        }
+      }
+      // If no session → page shows as-is (student hasn't enrolled yet)
+    })();
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/pages/login.html';
+    });
+  </script>
+</body>
+</html>
