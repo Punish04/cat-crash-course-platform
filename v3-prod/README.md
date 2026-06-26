@@ -101,8 +101,8 @@ For every **non-public** bucket, also add a Storage RLS policy restricting acces
 ### Step 4 — Connect Supabase to the App
 In `supabase/client.js` (and nowhere else — don't duplicate keys across files):
 ```js
-const SUPABASE_URL = "https://xxxxxxxxxxxx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGci...your anon key here...";
+const SUPABASE_URL = "https://scswtmwcogqtcdlxdgof.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc3d0bXdjb2dxdGNkbHhkZ29mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjEyNjUsImV4cCI6MjA5NzkzNzI2NX0.2FUNHO14StPk-xTJ7igiy1CePUZG0wtMBYX7v58jDwA";
 ```
 Both values are in: Supabase Dashboard → **Settings** → **API**.
 
