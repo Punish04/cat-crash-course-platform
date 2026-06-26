@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION fn_approve_payment(
   p_payment_id  UUID,
   p_email       TEXT,
   p_full_name   TEXT,
-  p_site_url    TEXT DEFAULT 'https://yoursite.com'
+  p_site_url    TEXT DEFAULT 'https://cat-crash-course-platform.careerchoice360.in/'
 )
 RETURNS JSONB
 LANGUAGE plpgsql
