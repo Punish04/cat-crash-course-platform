@@ -37,11 +37,11 @@ const CONFIG = {
 
   // Your Supabase project URL
   // Found at: Supabase Dashboard → Settings → API → Project URL
-  SUPABASE_URL: 'YOUR_SUPABASE_URL',
+  SUPABASE_URL: 'https://scswtmwcogqtcdlxdgof.supabase.co',
 
   // Your Supabase anon/public key (safe to use here — server-side script)
   // Found at: Supabase Dashboard → Settings → API → anon public
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjc3d0bXdjb2dxdGNkbHhkZ29mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjEyNjUsImV4cCI6MjA5NzkzNzI2NX0.2FUNHO14StPk-xTJ7igiy1CePUZG0wtMBYX7v58jDwA',
 
   // ── Google Form field names ──────────────────────────────────
   // These must match your Google Form question titles EXACTLY.
