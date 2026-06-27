@@ -1013,19 +1013,59 @@
   }
 
   async function approvePayment(paymentId, email, name) {
-    try {
-      const { error } = await supabase.rpc('fn_approve_payment', {
-        p_payment_id: paymentId,
-        p_email:      email,
-        p_full_name:  name,
-        p_site_url:   window.location.origin
-      });
-      if (error) throw error;
-      toast(`✓ Approved! Invite email sent to ${email}`, 'success');
-      loadPayments(); loadHomeDashboard();
-    } catch(e) { toast(`Error: ${e.message}`, 'error'); }
-  }
+  try {
+    const SERVICE_ROLE_KEY = 'YOUR_SECRET_KEY_HERE';
+    const SUPABASE_URL = 'https://scswtmwcogqtcdlxdgof.supabase.co';
 
+    // Step 1 — Send invite email via Supabase Admin API
+    const inviteRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        data: { full_name: name },
+        invite: true,
+        redirect_to: 'https://cat-crash-course-platform.careerchoice360.in/pages/set-password.html'
+      })
+    });
+
+    const inviteData = await inviteRes.json();
+
+    if (!inviteRes.ok) {
+      throw new Error(inviteData.msg || inviteData.message || 'Invite failed');
+    }
+
+    const userId = inviteData.id;
+
+    // Step 2 — Upsert student profile
+    await supabase.from('users').upsert({
+      id: userId,
+      full_name: name,
+      email: email,
+      course_access: true
+    });
+
+    // Step 3 — Init student progress
+    await supabase.from('student_progress').upsert({ user_id: userId });
+
+    // Step 4 — Mark payment approved
+    await supabase.from('payments').update({
+      status: 'approved',
+      reviewed_at: new Date().toISOString()
+    }).eq('id', paymentId);
+
+    toast(`✓ Approved! Invite email sent to ${email}`, 'success');
+    loadPayments();
+    loadHomeDashboard();
+
+  } catch(e) {
+    toast(`Error: ${e.message}`, 'error');
+  }
+}
   async function rejectPayment(paymentId) {
     await supabase.from('payments').update({ status: 'rejected' }).eq('id', paymentId);
     toast('Payment rejected.', 'error');
